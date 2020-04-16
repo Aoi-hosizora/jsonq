@@ -86,6 +86,31 @@ var arrDoc = `
 ]
 `
 
+var sepDoc = `
+[
+	{
+		"#": "#",
+		"1": "1",
+		"\\": "\\",
+		"+": "+",
+		".": "."
+	},
+	{
+		"##": [
+			0, "#", ".", "-1", "\\", "\\#\\"
+		],
+		"00": 0,
+		"\\\\": "\\\\",
+		"++": "++",
+		"..": ".."
+	},
+	{
+		"normal": "hello world",
+		"golang": "hello golang"
+	}
+]
+`
+
 func handle(obj interface{}, err error) interface{} {
 	if err != nil {
 		log.Fatalln(err)
@@ -115,6 +140,22 @@ func TestObject(t *testing.T) {
 	assert.Equal(t, val5, nil)
 	assert.Equal(t, val6, []interface{}{1., 2., 3.})
 	assert.Equal(t, val7, 1.)
+
+	val11 := handle(jq.SelectBySelector("a"))
+	val12 := handle(jq.SelectBySelector("c e"))
+	val13 := handle(jq.SelectBySelector("c f #0"))
+	val14 := handle(jq.SelectBySelector("c f #0 h"))
+	val15 := handle(jq.SelectBySelector("c j k"))
+	val16 := handle(jq.SelectBySelector("c j l #0"))
+	val17 := handle(jq.SelectBySelector("c j l #0 #0"))
+
+	assert.Equal(t, val11, "b")
+	assert.Equal(t, val12, 0.)
+	assert.Equal(t, val13, map[string]interface{}{"g": 123., "h": 0.3, "i": "abc"})
+	assert.Equal(t, val14, 0.3)
+	assert.Equal(t, val15, nil)
+	assert.Equal(t, val16, []interface{}{1., 2., 3.})
+	assert.Equal(t, val17, 1.)
 }
 
 func TestArray(t *testing.T) {
@@ -163,6 +204,42 @@ func TestMultiToken(t *testing.T) {
 	assert.Equal(t, val4, []interface{}{"d", "dd"})
 	assert.Equal(t, val5, []interface{}{"d", 0.2, "dd", 0.22})
 	assert.Equal(t, val6, []interface{}{"1g", "1gg", "2g", "2gg"})
+
+	val11 := handle(jq.SelectBySelector("#1+#2+#3 a"))
+	val12 := handle(jq.SelectBySelector("#1+#2+#3 b c"))
+	val13 := handle(jq.SelectBySelector("#1+#2+#3 b c+e"))
+	val14 := handle(jq.SelectBySelector("#1 b+bb c"))
+	val15 := handle(jq.SelectBySelector("#1 b+bb c+e"))
+	val16 := handle(jq.SelectBySelector("#2+#3 b f #0+#1 g"))
+
+	assert.Equal(t, val11, []interface{}{0., 1., 2.})
+	assert.Equal(t, val12, []interface{}{"d", "dd", "ddd"})
+	assert.Equal(t, val13, []interface{}{"d", 0.2, "dd", 0.22, "ddd", 0.222})
+	assert.Equal(t, val14, []interface{}{"d", "dd"})
+	assert.Equal(t, val15, []interface{}{"d", 0.2, "dd", 0.22})
+	assert.Equal(t, val16, []interface{}{"1g", "1gg", "2g", "2gg"})
+}
+
+func TestSelector(t *testing.T) {
+	doc, err := NewJsonDocument(sepDoc)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	jq := NewQuery(doc)
+	val1 := handle(jq.SelectBySelector("#0 ##"))
+	val2 := handle(jq.SelectBySelector("#0 ##+1+\\\\+\\++."))
+	val3 := handle(jq.SelectBySelector("#1 ### #5"))
+	val4 := handle(jq.SelectBySelector("#1 00+\\\\\\\\+\\+\\++.."))
+	val5 := handle(jq.SelectBySelector("#2 normal"))
+	val6 := handle(jq.SelectBySelector("#2 normal+golang"))
+
+	assert.Equal(t, val1, "#")
+	assert.Equal(t, val2, []interface{}{"#", "1", "\\", "+", "."})
+	assert.Equal(t, val3, "\\#\\")
+	assert.Equal(t, val4, []interface{}{0., "\\\\", "++", ".."})
+	assert.Equal(t, val5, "hello world")
+	assert.Equal(t, val6, []interface{}{"hello world", "hello golang"})
 }
 
 /*
@@ -172,5 +249,9 @@ func TestMultiToken(t *testing.T) {
 --- PASS: TestArray (0.00s)
 === RUN   TestMultiToken
 --- PASS: TestMultiToken (0.00s)
+=== RUN   TestSelector
+--- PASS: TestSelector (0.00s)
+=== RUN   TestEscapeString
+--- PASS: TestEscapeString (0.00s)
 PASS
- */
+*/

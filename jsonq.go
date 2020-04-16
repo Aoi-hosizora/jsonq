@@ -61,6 +61,14 @@ func (j *JsonQuery) Select(tokens ...interface{}) (interface{}, error) {
 	return vals[0], nil
 }
 
+func (j *JsonQuery) SelectBySelector(selectorString string) (interface{}, error) {
+	selector, err := escapeSelector(selectorString)
+	if err != nil {
+		return nil, err
+	}
+	return j.Select(selector...)
+}
+
 func rquery(blob interface{}, tokens ...interface{}) ([]interface{}, bool, error) {
 	vals := []interface{}{blob}
 	isArray := false
