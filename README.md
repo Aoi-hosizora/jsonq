@@ -6,10 +6,11 @@
 
 + Select object and array by tokens
 + Select by selector (jsonq version)
++ ~~Return a multi-layers object~~ (only support to return an array now)
 
 ### Usage
 
-+  see [jsonq_test.go](jsonq_test.go) for details
++ see [jsonq_test.go](jsonq_test.go) for details
 
 ```go
 doc, err := jsonq.NewJsonDocument(objDoc)
@@ -51,11 +52,11 @@ numbers  := (0..9)*
 ```
 
 + Escape rule:
-    + use `\` to escape all token, include `\` ` ` `+` `*` `#` (escape first)
-    + use raw number as a string
+    + use `\` to escape all tokens first (after ` ` and `+`)
+    + use raw number as a field name
     + use `#numbers` to escape as a number, `##` to escape `#` (only at the start of the token)
-    + use `*` to escape as a star, `**` to escape `*` (only at the start of the token)
-    + use `#xxx` (`xxx` is non-numbers) and `*xxx` to represent `xxx`, the first char `#` and `*` will be ignored
+    + use `*` to represent as a star token, `**` to escape `*` (only at the start of the token)
+    + use `#xxx` (`xxx` is a non-numbers) and `*xxx` to represent `xxx`, the first char `#` and `*` will be ignored
 + Example
 
 ```
