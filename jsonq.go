@@ -65,22 +65,8 @@ func rquery(blob interface{}, tokens ...interface{}) ([]interface{}, bool, error
 	vals := []interface{}{blob}
 	isArray := false
 	for _, token := range tokens { // take token of layers
-		if mtok, ok := token.(*MultiToken); ok {
-			// current layer is multi token
-			isArray = true
-			tmpVal := make([]interface{}, 0)
-			for _, val := range vals { // for all data
-				for _, stok := range mtok.sels {
-					// for a token in multiToken (BFS)
-					val, err := query(val, stok)
-					if err != nil {
-						return nil, isArray, err
-					}
-					tmpVal = append(tmpVal, val) // append to a new value array
-				}
-			}
-			vals = tmpVal
-		} else {
+		mtok, ok := token.(*MultiToken)
+		if !ok {
 			// current layer is single token
 			for idx, val := range vals { // for all data
 				val, err := query(val, token)
@@ -89,6 +75,22 @@ func rquery(blob interface{}, tokens ...interface{}) ([]interface{}, bool, error
 				}
 				vals[idx] = val // replace value directly
 			}
+		} else {
+			// current layer is multi token
+			isArray = true
+			tmpVal := make([]interface{}, 0)
+
+			for _, val := range vals { // for all data
+				for _, stok := range mtok.sels {
+					// for a token in multiToken (same level first)
+					val, err := query(val, stok)
+					if err != nil {
+						return nil, isArray, err
+					}
+					tmpVal = append(tmpVal, val) // append to a new value array
+				}
+			}
+			vals = tmpVal
 		}
 	}
 	return vals, isArray, nil
