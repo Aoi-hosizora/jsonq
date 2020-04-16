@@ -7,7 +7,7 @@ import (
 )
 
 type JsonDocument struct {
-	blob interface{}
+	blob interface{} // map / array
 }
 
 func NewJsonDocument(content string) (*JsonDocument, error) {
@@ -42,24 +42,60 @@ func NewQuery(doc *JsonDocument) *JsonQuery {
 	return &JsonQuery{doc: doc}
 }
 
-func (j *JsonQuery) Select(tokens ...interface{}) (interface{}, error) {
-	return rquery(j.doc.blob, tokens...)
+type MultiToken struct {
+	sels []interface{}
 }
 
-func rquery(blob interface{}, tokens ...interface{}) (interface{}, error) {
-	val := blob
-	var err error
-	for _, token := range tokens {
-		val, err = query(val, token)
-		if err != nil {
-			return nil, err
+func NewMultiToken(tokens ...interface{}) *MultiToken {
+	return &MultiToken{sels: tokens}
+}
+
+func (j *JsonQuery) Select(tokens ...interface{}) (interface{}, error) {
+	vals, multi, err := rquery(j.doc.blob, tokens...)
+	if err != nil {
+		return nil, err
+	}
+	if multi {
+		return vals, nil
+	}
+	return vals[0], nil
+}
+
+func rquery(blob interface{}, tokens ...interface{}) ([]interface{}, bool, error) {
+	vals := []interface{}{blob}
+	isArray := false
+	for _, token := range tokens { // take token of layers
+		if mtok, ok := token.(*MultiToken); ok {
+			// current layer is multi token
+			isArray = true
+			tmpVal := make([]interface{}, 0)
+			for _, val := range vals { // for all data
+				for _, stok := range mtok.sels {
+					// for a token in multiToken (BFS)
+					val, err := query(val, stok)
+					if err != nil {
+						return nil, isArray, err
+					}
+					tmpVal = append(tmpVal, val) // append to a new value array
+				}
+			}
+			vals = tmpVal
+		} else {
+			// current layer is single token
+			for idx, val := range vals { // for all data
+				val, err := query(val, token)
+				if err != nil {
+					return nil, isArray, err
+				}
+				vals[idx] = val // replace value directly
+			}
 		}
 	}
-	return val, nil
+	return vals, isArray, nil
 }
 
-func query(blob interface{}, query interface{}) (interface{}, error) {
-	idx, ok := query.(int)
+func query(blob interface{}, token interface{}) (interface{}, error) {
+	idx, ok := token.(int)
 	if ok { // array
 		arr, ok := blob.([]interface{})
 		if !ok {
@@ -70,17 +106,17 @@ func query(blob interface{}, query interface{}) (interface{}, error) {
 		}
 		return arr[idx], nil
 	}
-	tok, ok := query.(string)
+	tok, ok := token.(string)
 	if ok { // object
 		obj, ok := blob.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("Object lookup \"%s\" on non-object %v\n", query, blob)
+			return nil, fmt.Errorf("Object lookup \"%s\" on non-object %v\n", token, blob)
 		}
 		val, ok := obj[tok]
 		if !ok { // field not exist
-			return nil, fmt.Errorf("Object %v does not contain field %s\n", blob, query)
+			return nil, fmt.Errorf("Object %v does not contain field \"%s\"\n", blob, token)
 		}
 		return val, nil
 	}
-	return nil, fmt.Errorf("Input %v is a non-array ans non-object\n", blob)
+	return nil, fmt.Errorf("Input %v is a non-array and non-object\n", blob)
 }

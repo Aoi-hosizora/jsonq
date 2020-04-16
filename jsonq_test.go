@@ -35,13 +35,28 @@ var arrDoc = `
 		"b": {
 			"c": "d",
 			"e": 0.2
+		},
+		"bb": {
+			"c": "dd",
+			"e": 0.22
 		}
 	},
 	{
 		"a": 1,
 		"b": {
 			"c": "dd",
-			"e": 0.22
+			"e": 0.22,
+			"e": 0.22,
+			"f": [
+				{
+					"g": "1g",
+					"h": "1h"
+				},
+				{
+					"g": "1gg",
+					"h": "1hh"
+				}
+			]
 		}
 	},
 	{
@@ -51,16 +66,16 @@ var arrDoc = `
 			"e": 0.222,
 			"f": [
 				{
-					"g": "g",
-					"h": "h"
+					"g": "2g",
+					"h": "2h"
 				},
 				{
-					"g": "gg",
-					"h": "hh"
+					"g": "2gg",
+					"h": "2hh"
 				},
 				{
-					"g": "gg",
-					"h": "hh"
+					"g": "2gg",
+					"h": "2hh"
 				},
 				[1, 2, 3],
 				[4.1, 5.2, 6.3]
@@ -119,11 +134,43 @@ func TestArray(t *testing.T) {
 	val8 := handle(jq.Select(4))                 // <nil>
 
 	assert.Equal(t, val1, []interface{}{1., 2., 3.})
-	assert.Equal(t, val2, map[string]interface{}{"a": 0., "b": map[string]interface{}{"c": "d", "e": 0.2}})
+	assert.Equal(t, val2, map[string]interface{}{"a": 0., "b": map[string]interface{}{"c": "d", "e": 0.2}, "bb": map[string]interface{}{"c": "dd", "e": 0.22}})
 	assert.Equal(t, val3, 1.)
 	assert.Equal(t, val4, "dd")
-	assert.Equal(t, val5, map[string]interface{}{"g": "g", "h": "h"})
+	assert.Equal(t, val5, map[string]interface{}{"g": "2g", "h": "2h"})
 	assert.Equal(t, val6, []interface{}{1., 2., 3.})
 	assert.Equal(t, val7, 5.2)
 	assert.Equal(t, val8, nil)
 }
+
+func TestMultiToken(t *testing.T) {
+	doc, err := NewJsonDocument(arrDoc)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	jq := NewQuery(doc)
+	val1 := handle(jq.Select(NewMultiToken(1, 2, 3), "a"))                             // [0 1 2]
+	val2 := handle(jq.Select(NewMultiToken(1, 2, 3), "b", "c"))                        // [d dd ddd]
+	val3 := handle(jq.Select(NewMultiToken(1, 2, 3), "b", NewMultiToken("c", "e")))    // [d 0.2 dd 0.22 ddd 0.222]
+	val4 := handle(jq.Select(1, NewMultiToken("b", "bb"), "c"))                        // [d dd]
+	val5 := handle(jq.Select(1, NewMultiToken("b", "bb"), NewMultiToken("c", "e")))    // [d 0.2 dd 0.22]
+	val6 := handle(jq.Select(NewMultiToken(2, 3), "b", "f", NewMultiToken(0, 1), "g")) // [1g 1gg 2g 2gg]
+
+	assert.Equal(t, val1, []interface{}{0., 1., 2.})
+	assert.Equal(t, val2, []interface{}{"d", "dd", "ddd"})
+	assert.Equal(t, val3, []interface{}{"d", 0.2, "dd", 0.22, "ddd", 0.222})
+	assert.Equal(t, val4, []interface{}{"d", "dd"})
+	assert.Equal(t, val5, []interface{}{"d", 0.2, "dd", 0.22})
+	assert.Equal(t, val6, []interface{}{"1g", "1gg", "2g", "2gg"})
+}
+
+/*
+=== RUN   TestObject
+--- PASS: TestObject (0.00s)
+=== RUN   TestArray
+--- PASS: TestArray (0.00s)
+=== RUN   TestMultiToken
+--- PASS: TestMultiToken (0.00s)
+PASS
+ */
