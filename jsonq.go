@@ -131,8 +131,11 @@ func query(blob interface{}, token interface{}) (interface{}, error) {
 		if !ok {
 			return nil, fmt.Errorf("Array index on non-array %v\n", blob)
 		}
-		if len(arr) <= idx { // out of bound
+		if len(arr) <= idx || idx <= -len(arr)-1 { // out of bound
 			return nil, fmt.Errorf("Array index %d on array %v out of bound\n", idx, blob)
+		}
+		if idx < 0 {
+			idx += len(arr)
 		}
 		return arr[idx], nil
 	}

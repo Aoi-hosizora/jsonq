@@ -20,6 +20,8 @@ jq := jsonq.NewQuery(doc)
 
 // m[1]
 val, err := jq.Select(1)
+// m[len(m)-2][0]
+val, err := jq.Select(-2, 0)
 // m["a"]["0"]["b"]
 val, err := jq.Select("a", "0", "b")
 // m["a"][0]["b"][0:2]
