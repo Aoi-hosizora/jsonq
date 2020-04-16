@@ -10,7 +10,7 @@ func TestEscapeString(t *testing.T) {
 	assert.Equal(t, ret1, []interface{}{"token1", 2, NewMultiToken("token3", "token4"), NewMultiToken(5, 6), "token7 + 8", "9", 10, "#0#", -1})
 
 	ret2, _ := escapeSelector("123123 #000 \\\\456 \\789 ###### * *\\* **\\\\*+***\\\\*+**+##+###\\#")
-	assert.Equal(t, ret2, []interface{}{"123123", 0, "\\456", "789", "#####", NewAllFieldsToken(), "*", NewMultiToken("*\\*", "**\\*", "*", "#", "###")})
+	assert.Equal(t, ret2, []interface{}{"123123", 0, "\\456", "789", "#####", NewStarToken(), "*", NewMultiToken("*\\*", "**\\*", "*", "#", "###")})
 
 	ret3, _ := escapeSelector("")
 	assert.Equal(t, ret3, []interface{}{})

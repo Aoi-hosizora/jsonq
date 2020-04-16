@@ -236,18 +236,18 @@ func TestMultiToken(t *testing.T) {
 	assert.Equal(t, val17, []interface{}{4.1, 1.})
 }
 
-func TestAllFieldsToken(t *testing.T) {
+func TestStarToken(t *testing.T) {
 	doc, err := NewJsonDocument(arrDoc)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	jq := NewQuery(doc)
-	val1 := handle(jq.Select(0, NewAllFieldsToken()))
-	val2 := handle(jq.Select(1, "b", NewAllFieldsToken()))
-	val3 := handle(jq.Select(2, "b", "f", NewAllFieldsToken(), "g"))
-	val4 := handle(jq.Select(2, "b", "f", NewAllFieldsToken(), NewMultiToken("g", "h")))
-	val5 := handle(jq.Select(-2, "b", "f", -2, NewAllFieldsToken()))
+	val1 := handle(jq.Select(0, NewStarToken()))
+	val2 := handle(jq.Select(1, "b", NewStarToken()))
+	val3 := handle(jq.Select(2, "b", "f", NewStarToken(), "g"))
+	val4 := handle(jq.Select(2, "b", "f", NewStarToken(), NewMultiToken("g", "h")))
+	val5 := handle(jq.Select(-2, "b", "f", -2, NewStarToken()))
 
 	assert.Equal(t, val1, []interface{}{1., 2., 3.})
 	assert.Equal(t, val2, []interface{}{"d", 0.2})
@@ -299,8 +299,8 @@ func TestSelector(t *testing.T) {
 --- PASS: TestArray (0.00s)
 === RUN   TestMultiToken
 --- PASS: TestMultiToken (0.00s)
-=== RUN   TestAllFieldsToken
---- PASS: TestAllFieldsToken (0.00s)
+=== RUN   TestStarToken
+--- PASS: TestStarToken (0.00s)
 === RUN   TestSelector
 --- PASS: TestSelector (0.00s)
 === RUN   TestEscapeString

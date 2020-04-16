@@ -11,7 +11,7 @@ func escapeSelector(selector string) ([]interface{}, error) {
 	allToks := escapeString(selector) // [][]string
 	ret := make([]interface{}, 0)
 	for _, mtok := range allToks {
-		if len(mtok) == 1 { // single token / allField token
+		if len(mtok) == 1 { // single token / star token
 			res, err := escapeSharp(mtok[0]) // string || int || star
 			if err != nil {
 				return nil, err
@@ -69,7 +69,7 @@ func escapeString(selector string) [][]string {
 		}
 
 		ap := string(selector[idx])
-		if ap == "\\" && len(selector) > idx { // escape all char, including " ", "+" and "\"
+		if ap == "\\" && len(selector) > idx { // escape all char, including " ", "+" "\" "#" "*"
 			idx++
 			ap = string(selector[idx])
 		}
@@ -100,7 +100,7 @@ func escapeSharp(tok string) (interface{}, error) {
 		return nil, nil // return nil
 	}
 	if tok == "*" { // *
-		return NewAllFieldsToken(), nil
+		return NewStarToken(), nil
 	}
 	if len(tok) >= 2 && tok[0] == '*' { // *xx
 		return tok[1:], nil

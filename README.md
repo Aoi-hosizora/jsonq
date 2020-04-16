@@ -21,7 +21,7 @@ jq := jsonq.NewQuery(doc)
 // m[1]
 val, err := jq.Select(1)
 // m[:]
-val, err := jq.Select(jsonq.NewAllFieldsToken()) // *
+val, err := jq.Select(jsonq.NewStarToken()) // *
 // m[len(m)-2][0]
 val, err := jq.Select(-2, 0)
 // m["a"]["0"]["b"]
@@ -53,9 +53,9 @@ numbers  := (0..9)*
 + Escape rule:
     + use `\` to escape all token, include `\` ` ` `+` `*` `#` (escape first)
     + use raw number as a string
-    + use `#numbers` to escape as a number, `##` to escape `#` (only in the beginning of the token)
-    + use `*` to escape as a allFields, `**` to escape `*` (only in the beginning of the token)
-    + use `#xxx` (`xxx` is non-numbers) and `*xxx` to represent `xxx`, `#` and `*` will be ignored
+    + use `#numbers` to escape as a number, `##` to escape `#` (only at the start of the token)
+    + use `*` to escape as a star, `**` to escape `*` (only at the start of the token)
+    + use `#xxx` (`xxx` is non-numbers) and `*xxx` to represent `xxx`, the first char `#` and `*` will be ignored
 + Example
 
 ```
@@ -63,7 +63,7 @@ token1 #2 token3+token4 #5+#6 token7\ \+\ 8 9 #10 ##0# #-1
 -> "token1", 2, {"token3", "token4"}, {5, 6}, "token7 + 8", "9", 10, "#0#", -1
 
 123123 #000 \\456 \789 ###### * *\* **\\*+***\\*+**+##+###\#
--> "123123", 0, "\456", "789", "#####", AllFieldToken(), "*", {"*\*", "**\*", "*", "#", "###"}
+-> "123123", 0, "\456", "789", "#####", *, "*", {"*\*", "**\*", "*", "#", "###"}
 
 0 #1 #2+#3 #4+#5+#6 ##+#0+####\++##+\+##
 -> "0", 1, {2, 3}, {4, 5, 6}, {"#", 0, "###+", "#", "+##"}

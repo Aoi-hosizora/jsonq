@@ -58,11 +58,11 @@ func NewMultiToken(tokens ...interface{}) *MultiToken {
 }
 
 // select all fields in the same layer -> "*"
-type AllFieldsToken struct{}
+type StarToken struct{}
 
 // build a selector which will select all fields in the same layer
-func NewAllFieldsToken() *AllFieldsToken {
-	return &AllFieldsToken{}
+func NewStarToken() *StarToken {
+	return &StarToken{}
 }
 
 // key code start from here
@@ -90,16 +90,16 @@ func (j *JsonQuery) SelectBySelector(selectorString string) (interface{}, error)
 
 // repetition query: tokens []interface{}
 // If it is a SingleToken(string, integer), it will select fields in different layers
-// If it is a MultiToken(allFieldToken is unavailable), it will select fields in the same layer
-// If it is a AllFieldToken, it will select all fields in the same layer
-// once have a MultiToken or an AllFieldToken, that will return an array
+// If it is a MultiToken(StarToken will return error), it will select fields in the same layer
+// If it is a StarToken, it will select all fields in the same layer
+// once have a MultiToken or an StarToken, that will return an array
 func rquery(blob interface{}, tokens ...interface{}) ([]interface{}, bool, error) {
 	vals := []interface{}{blob}
 	isArray := false
 	for _, token := range tokens {
 		// get a token (stok / mtok / atok) in different layers
 		mtok, isMul := token.(*MultiToken)
-		_, isAll := token.(*AllFieldsToken)
+		_, isAll := token.(*StarToken)
 
 		if !isMul && !isAll {
 			// current layer is a single token
@@ -111,7 +111,7 @@ func rquery(blob interface{}, tokens ...interface{}) ([]interface{}, bool, error
 				vals[idx] = val // replace values directly
 			}
 		} else {
-			// current layer is a multi token / an allField token
+			// current layer is a multi token / an star token
 			isArray = true
 			tmpVal := make([]interface{}, 0)
 
@@ -129,7 +129,7 @@ func rquery(blob interface{}, tokens ...interface{}) ([]interface{}, bool, error
 					}
 				}
 			} else {
-				// current layer is a allToken token
+				// current layer is a star token
 				for _, val := range vals {
 					// get all fields
 					vals, err := queryAll(val)
@@ -182,7 +182,7 @@ func query(blob interface{}, token interface{}) (interface{}, error) {
 	return nil, fmt.Errorf("Input %v is a non-array and non-object\n", blob)
 }
 
-// query all fields: AllFieldToken
+// query all fields: starToken
 func queryAll(blob interface{}) ([]interface{}, error) {
 	arr, ok := blob.([]interface{})
 	if ok {
