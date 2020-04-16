@@ -11,8 +11,8 @@ func escapeSelector(selector string) ([]interface{}, error) {
 	allToks := escapeString(selector) // [][]string
 	ret := make([]interface{}, 0)
 	for _, mtok := range allToks {
-		if len(mtok) == 1 { // single token
-			res, err := escapeSharp(mtok[0]) // string || int
+		if len(mtok) == 1 { // single token / allField token
+			res, err := escapeSharp(mtok[0]) // string || int || star
 			if err != nil {
 				return nil, err
 			}
@@ -94,17 +94,22 @@ func escapeString(selector string) [][]string {
 	return allToks
 }
 
-// render # in token, return number or string
+// render # in token, return number or string or star
 func escapeSharp(tok string) (interface{}, error) {
 	if len(tok) == 0 {
 		return nil, nil // return nil
 	}
-
-	// len(tok) >= 1
+	if tok == "*" { // *
+		return NewAllFieldsToken(), nil
+	}
+	if len(tok) >= 2 && tok[0] == '*' { // *xx
+		return tok[1:], nil
+	}
 	if tok[0] != '#' { // xxx
 		return tok, nil
 	}
 
+	// start #
 	// tok[0] == '#' && len(tok) >= 1
 	if len(tok) == 1 { // #
 		return nil, fmt.Errorf("Number should appear after single #, find null\n")

@@ -93,7 +93,8 @@ var sepDoc = `
 		"1": "1",
 		"\\": "\\",
 		"+": "+",
-		".": "."
+		".": ".",
+		"*": "*"
 	},
 	{
 		"##": [
@@ -102,7 +103,8 @@ var sepDoc = `
 		"00": 0,
 		"\\\\": "\\\\",
 		"++": "++",
-		"..": ".."
+		"..": "..",
+		"**": "**"
 	},
 	{
 		"normal": "hello world",
@@ -234,6 +236,38 @@ func TestMultiToken(t *testing.T) {
 	assert.Equal(t, val17, []interface{}{4.1, 1.})
 }
 
+func TestAllFieldsToken(t *testing.T) {
+	doc, err := NewJsonDocument(arrDoc)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	jq := NewQuery(doc)
+	val1 := handle(jq.Select(0, NewAllFieldsToken()))
+	val2 := handle(jq.Select(1, "b", NewAllFieldsToken()))
+	val3 := handle(jq.Select(2, "b", "f", NewAllFieldsToken(), "g"))
+	val4 := handle(jq.Select(2, "b", "f", NewAllFieldsToken(), NewMultiToken("g", "h")))
+	val5 := handle(jq.Select(-2, "b", "f", -2, NewAllFieldsToken()))
+
+	assert.Equal(t, val1, []interface{}{1., 2., 3.})
+	assert.Equal(t, val2, []interface{}{"d", 0.2})
+	assert.Equal(t, val3, []interface{}{"1g", "1gg"})
+	assert.Equal(t, val4, []interface{}{"1g", "1h", "1gg", "1hh"})
+	assert.Equal(t, val5, []interface{}{1., 2., 3.})
+
+	val11 := handle(jq.SelectBySelector("#0 *"))
+	val12 := handle(jq.SelectBySelector("#1 b *"))
+	val13 := handle(jq.SelectBySelector("#2 b f * g"))
+	val14 := handle(jq.SelectBySelector("#2 b f * g+h"))
+	val15 := handle(jq.SelectBySelector("#-2 b f #-2 *"))
+
+	assert.Equal(t, val11, []interface{}{1., 2., 3.})
+	assert.Equal(t, val12, []interface{}{"d", 0.2})
+	assert.Equal(t, val13, []interface{}{"1g", "1gg"})
+	assert.Equal(t, val14, []interface{}{"1g", "1h", "1gg", "1hh"})
+	assert.Equal(t, val15, []interface{}{1., 2., 3.})
+}
+
 func TestSelector(t *testing.T) {
 	doc, err := NewJsonDocument(sepDoc)
 	if err != nil {
@@ -242,18 +276,20 @@ func TestSelector(t *testing.T) {
 
 	jq := NewQuery(doc)
 	val1 := handle(jq.SelectBySelector("#0 ##"))
-	val2 := handle(jq.SelectBySelector("#-3 ##+1+\\\\+\\++."))
+	val2 := handle(jq.SelectBySelector("#-3 1+##+\\\\+\\++.+**"))
 	val3 := handle(jq.SelectBySelector("#1 ### #5"))
-	val4 := handle(jq.SelectBySelector("#-2 00+\\\\\\\\+\\+\\++.."))
+	val4 := handle(jq.SelectBySelector("#-2 00+\\\\\\\\+\\+\\++..+***"))
 	val5 := handle(jq.SelectBySelector("#2 normal"))
 	val6 := handle(jq.SelectBySelector("#-1 normal+golang"))
+	val7 := handle(jq.SelectBySelector("#-1 *"))
 
 	assert.Equal(t, val1, "#")
-	assert.Equal(t, val2, []interface{}{"#", "1", "\\", "+", "."})
+	assert.Equal(t, val2, []interface{}{"1", "#", "\\", "+", ".", "*"})
 	assert.Equal(t, val3, "\\#\\")
-	assert.Equal(t, val4, []interface{}{0., "\\\\", "++", ".."})
+	assert.Equal(t, val4, []interface{}{0., "\\\\", "++", "..", "**"})
 	assert.Equal(t, val5, "hello world")
 	assert.Equal(t, val6, []interface{}{"hello world", "hello golang"})
+	assert.Equal(t, val7, []interface{}{"hello world", "hello golang"})
 }
 
 /*
@@ -263,6 +299,8 @@ func TestSelector(t *testing.T) {
 --- PASS: TestArray (0.00s)
 === RUN   TestMultiToken
 --- PASS: TestMultiToken (0.00s)
+=== RUN   TestAllFieldsToken
+--- PASS: TestAllFieldsToken (0.00s)
 === RUN   TestSelector
 --- PASS: TestSelector (0.00s)
 === RUN   TestEscapeString
