@@ -35,7 +35,7 @@ val, err := jq.SelectBySelector("#1 a 2 b #0+#2")
 
 ```
 selector := selector selector // the next layer
-selector := selector+selector // multiple items in the current layer
+selector := selector+selector // multiple field in the current layer
 selector := token
 
 token    := #number

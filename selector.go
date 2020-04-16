@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// render selector string to array of interface{} (string || int || MultiToken)
+// render a selector string to array of interface{} (string || int || MultiToken)
 func escapeSelector(selector string) ([]interface{}, error) {
 	allToks := escapeString(selector) // [][]string
 	ret := make([]interface{}, 0)
@@ -39,7 +39,7 @@ func escapeSelector(selector string) ([]interface{}, error) {
 	return ret, nil
 }
 
-// render \ + in selector, return multiTok array
+// render "\" "+" " " in a selector string, return a multiTok array
 func escapeString(selector string) [][]string {
 	selector = strings.TrimSpace(selector)
 	if selector == "" {
