@@ -7,31 +7,31 @@ import (
 )
 
 type JsonDocument struct {
-	obj map[string]interface{}
+	blob interface{}
 }
 
 func NewJsonDocument(content string) (*JsonDocument, error) {
 	content = strings.TrimSpace(content)
 	if len(content) == 0 {
-		return nil, fmt.Errorf("")
+		return nil, fmt.Errorf("Expected json string, got an empty string\n")
 	}
-	obj := make(map[string]interface{})
-	if content[0] == '{' {
+	if content[0] == '{' { // out is object
+		obj := make(map[string]interface{})
 		err := json.Unmarshal([]byte(content), &obj)
 		if err != nil {
 			return nil, err
 		}
-	} else if content[0] == '[' {
+		return &JsonDocument{blob: obj}, nil
+	} else if content[0] == '[' { // out is array
 		arr := make([]interface{}, 0)
 		err := json.Unmarshal([]byte(content), &arr)
 		if err != nil {
 			return nil, err
 		}
-		obj["_"] = arr
+		return &JsonDocument{blob: arr}, nil
 	} else {
-		return nil, fmt.Errorf("")
+		return nil, fmt.Errorf("Expected [ or { as the json's first token, got \"%c\"\n", content[0])
 	}
-	return &JsonDocument{obj: obj}, nil
 }
 
 type JsonQuery struct {
@@ -43,21 +43,7 @@ func NewQuery(doc *JsonDocument) *JsonQuery {
 }
 
 func (j *JsonQuery) Select(tokens ...interface{}) (interface{}, error) {
-	if len(tokens) == 0 {
-		return j.doc.obj, nil
-	}
-	idx, ok := tokens[0].(int)
-	if ok { // the first one is an integer -> out is array
-		arr, ok := j.doc.obj["_"].([]interface{})
-		if !ok {
-			return nil, fmt.Errorf("")
-		}
-		if len(arr) <= idx {
-			return nil, fmt.Errorf("")
-		}
-		return rquery(arr[idx], tokens[1:]...)
-	}
-	return rquery(j.doc.obj, tokens...)
+	return rquery(j.doc.blob, tokens...)
 }
 
 func rquery(blob interface{}, tokens ...interface{}) (interface{}, error) {
@@ -77,10 +63,10 @@ func query(blob interface{}, query interface{}) (interface{}, error) {
 	if ok { // array
 		arr, ok := blob.([]interface{})
 		if !ok {
-			return nil, fmt.Errorf("")
+			return nil, fmt.Errorf("Array index on non-array %v\n", blob)
 		}
-		if len(arr) <= idx { // out of bound
-			return nil, fmt.Errorf("")
+		if len(arr) <= idx { // out of bounds
+			return nil, fmt.Errorf("Array index %d on array %v out of bounds\n", idx, blob)
 		}
 		return arr[idx], nil
 	}
@@ -88,13 +74,13 @@ func query(blob interface{}, query interface{}) (interface{}, error) {
 	if ok { // object
 		obj, ok := blob.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("")
+			return nil, fmt.Errorf("Object lookup \"%s\" on non-object %v\n", query, blob)
 		}
 		val, ok := obj[tok]
-		if !ok { // key not exist
-			return nil, fmt.Errorf("")
+		if !ok { // field not exist
+			return nil, fmt.Errorf("Object %v does not contain field %s\n", blob, query)
 		}
 		return val, nil
 	}
-	return nil, fmt.Errorf("")
+	return nil, fmt.Errorf("Input %v is a non-array ans non-object\n", blob)
 }

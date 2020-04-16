@@ -29,6 +29,7 @@ var objDoc = `
 
 var arrDoc = `
 [
+	[1, 2, 3],
 	{
 		"a": 0,
 		"b": {
@@ -77,7 +78,7 @@ func handle(obj interface{}, err error) interface{} {
 	return obj
 }
 
-func TestJson(t *testing.T) {
+func TestObject(t *testing.T) {
 	doc, err := NewJsonDocument(objDoc)
 	if err != nil {
 		log.Fatalln(err)
@@ -108,19 +109,21 @@ func TestArray(t *testing.T) {
 	}
 
 	jq := NewQuery(doc)
-	val1 := handle(jq.Select(0))                 // map[a:0 b:map[c:d e:0.2]]
-	val2 := handle(jq.Select(1, "a"))            // 1
-	val3 := handle(jq.Select(1, "b", "c"))       // dd
-	val4 := handle(jq.Select(2, "b", "f", 0))    // map[g:g h:h]
-	val5 := handle(jq.Select(2, "b", "f", 3))    // [1 2 3]
-	val6 := handle(jq.Select(2, "b", "f", 4, 1)) // 5.2
-	val7 := handle(jq.Select(3))                 // <nil>
+	val1 := handle(jq.Select(0))                 // [1 2 3]
+	val2 := handle(jq.Select(1))                 // map[a:0 b:map[c:d e:0.2]]
+	val3 := handle(jq.Select(2, "a"))            // 1
+	val4 := handle(jq.Select(2, "b", "c"))       // dd
+	val5 := handle(jq.Select(3, "b", "f", 0))    // map[g:g h:h]
+	val6 := handle(jq.Select(3, "b", "f", 3))    // [1 2 3]
+	val7 := handle(jq.Select(3, "b", "f", 4, 1)) // 5.2
+	val8 := handle(jq.Select(4))                 // <nil>
 
-	assert.Equal(t, val1, map[string]interface{}{"a": 0., "b": map[string]interface{}{"c": "d", "e": 0.2}})
-	assert.Equal(t, val2, 1.)
-	assert.Equal(t, val3, "dd")
-	assert.Equal(t, val4, map[string]interface{}{"g": "g", "h": "h"})
-	assert.Equal(t, val5, []interface{}{1., 2., 3.})
-	assert.Equal(t, val6, 5.2)
-	assert.Equal(t, val7, nil)
+	assert.Equal(t, val1, []interface{}{1., 2., 3.})
+	assert.Equal(t, val2, map[string]interface{}{"a": 0., "b": map[string]interface{}{"c": "d", "e": 0.2}})
+	assert.Equal(t, val3, 1.)
+	assert.Equal(t, val4, "dd")
+	assert.Equal(t, val5, map[string]interface{}{"g": "g", "h": "h"})
+	assert.Equal(t, val6, []interface{}{1., 2., 3.})
+	assert.Equal(t, val7, 5.2)
+	assert.Equal(t, val8, nil)
 }
