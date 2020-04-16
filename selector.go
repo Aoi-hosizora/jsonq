@@ -6,13 +6,47 @@ import (
 	"strings"
 )
 
-func renderSelector(selector string) ([]interface{}, error) {
-	selector = strings.TrimSpace(selector)
-	if selector == "" {
-		return []interface{}{}, nil
+// render selector string to array of interface{} (string || int || MultiToken)
+func escapeSelector(selector string) ([]interface{}, error) {
+	allToks := escapeString(selector) // [][]string
+	ret := make([]interface{}, 0)
+	for _, mtok := range allToks {
+		if len(mtok) == 1 { // single token
+			res, err := escapeSharp(mtok[0]) // string || int
+			if err != nil {
+				return nil, err
+			}
+			if res != nil {
+				ret = append(ret, res) // <<<
+			}
+		} else if len(mtok) >= 2 { // multi token
+			multi := NewMultiToken()
+			for _, stok := range mtok { // for each single token
+				res, err := escapeSharp(stok) // string || int
+				if err != nil {
+					return nil, err
+				}
+				if res != nil {
+					multi.sels = append(multi.sels, res) // <<<
+				}
+			}
+			if len(multi.sels) != 0 {
+				ret = append(ret, multi) // <<<
+			}
+		}
 	}
 
-	// selector string -> [][]string
+	return ret, nil
+}
+
+// render \ + in selector, return multiTok array
+func escapeString(selector string) [][]string {
+	selector = strings.TrimSpace(selector)
+	if selector == "" {
+		return nil
+	}
+
+	// string to [][]string
 	_allToks := make([][]string, 0)
 	_curToks := make([]string, 0)
 	_curTok := ""
@@ -57,60 +91,36 @@ func renderSelector(selector string) ([]interface{}, error) {
 		}
 	}
 
-	// selector [][]string -> []interface{}
-
-	ret := make([]interface{}, 0)
-	for _, mtok := range allToks {
-		if len(mtok) == 1 { // single token
-			err := render(&ret, mtok[0])
-			if err != nil {
-				return nil, err
-			}
-		} else if len(mtok) >= 2 { // multi token
-			multi := NewMultiToken()
-			for _, stok := range mtok { // for each single token
-				err := render(&multi.sels, stok)
-				if err != nil {
-					return nil, err
-				}
-			}
-			ret = append(ret, multi)
-		}
-	}
-
-	return ret, nil
+	return allToks
 }
 
-// render number and string
-func render(arr *[]interface{}, tok string) error {
+// render # in token, return number or string
+func escapeSharp(tok string) (interface{}, error) {
 	if len(tok) == 0 {
-		return nil
+		return nil, nil // return nil
 	}
 
 	// len(tok) >= 1
 	if tok[0] != '#' { // xxx
-		*arr = append(*arr, tok)
-		return nil
+		return tok, nil
 	}
 
 	// tok[0] == '#' && len(tok) >= 1
 	if len(tok) == 1 { // #
-		return fmt.Errorf("Number should appear after single #, find null\n")
+		return nil, fmt.Errorf("Number should appear after single #, find null\n")
 	}
 
 	// tok[0] == '#' && len(tok) >= 2
 	if tok[1] == '#' { // ##xxx
-		*arr = append(*arr, tok[1:]) // delete one #
-		return nil
+		return tok[1:], nil // delete one #
 	}
 
 	// tok[0] == '#' && tok[1] != '#'
 	number, err := strconv.Atoi(tok[1:])
 	if err != nil { // #xxx
-		return fmt.Errorf("Number should appear after single #, find \"%c\"\n", tok[1])
+		return nil, fmt.Errorf("Number should appear after single #, find \"%c\"\n", tok[1])
 	}
 
 	// #0
-	*arr = append(*arr, number)
-	return nil
+	return number, nil
 }
