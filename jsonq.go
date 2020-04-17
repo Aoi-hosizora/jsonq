@@ -50,21 +50,21 @@ func NewJsonQuery(doc *JsonDocument) *JsonQuery {
 }
 
 // select multiple fields in the same layer -> "+"
-type MultiToken struct {
+type multiToken struct {
 	sels []interface{}
 }
 
 // build a multiple selector which will select multiple fields in the same layer
-func Multi(tokens ...interface{}) *MultiToken {
-	return &MultiToken{sels: tokens}
+func Multi(tokens ...interface{}) *multiToken {
+	return &multiToken{sels: tokens}
 }
 
 // select all fields in the same layer -> "*"
-type StarToken struct{}
+type starToken struct{}
 
 // build a selector which will select all fields in the same layer
-func All() *StarToken {
-	return &StarToken{}
+func All() *starToken {
+	return &starToken{}
 }
 
 // key code start from here
@@ -83,7 +83,7 @@ func (j *JsonQuery) Select(tokens ...interface{}) (interface{}, error) {
 
 // query json by a selector string
 func (j *JsonQuery) SelectBySelector(selectorString string) (interface{}, error) {
-	selector, err := NewParser(selectorString).Parse()
+	selector, err := _NewParser(selectorString).Parse()
 	if err != nil {
 		return nil, err
 	}
@@ -92,16 +92,16 @@ func (j *JsonQuery) SelectBySelector(selectorString string) (interface{}, error)
 
 // repetition query: tokens []interface{}
 // If it is a SingleToken(string, integer), it will select fields in different layers
-// If it is a MultiToken(StarToken will return error), it will select fields in the same layer
-// If it is a StarToken, it will select all fields in the same layer
-// once have a MultiToken or an StarToken, that will return an array
+// If it is a multiToken(starToken will return error), it will select fields in the same layer
+// If it is a starToken, it will select all fields in the same layer
+// once have a multiToken or an starToken, that will return an array
 func rquery(blob interface{}, tokens ...interface{}) ([]interface{}, bool, error) {
 	vals := []interface{}{blob}
 	isArray := false
 	for _, token := range tokens {
 		// get a token (stok / mtok / atok) in different layers
-		mtok, isMul := token.(*MultiToken)
-		_, isAll := token.(*StarToken)
+		mtok, isMul := token.(*multiToken)
+		_, isAll := token.(*starToken)
 
 		if !isMul && !isAll {
 			// current layer is a single token

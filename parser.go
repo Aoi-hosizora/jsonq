@@ -9,29 +9,29 @@ import (
 	"strings"
 )
 
-type Token int
+type _Token int
 
 const (
 	eof = rune(0)
 
-	ILLEGAL Token = iota
-	EOF
-	WHITESPACE
-	IDENT
-	ASTERISK // *
-	PLUS     // +
-	NUMBER   // #0
+	_ILLEGAL _Token = iota
+	_EOF
+	_WHITESPACE
+	_IDENT
+	_ASTERISK // *
+	_PLUS     // +
+	_NUMBER   // #0
 )
 
-type Scanner struct {
+type _Scanner struct {
 	r *bufio.Reader
 }
 
-func NewScanner(r io.Reader) *Scanner {
-	return &Scanner{r: bufio.NewReader(r)}
+func _NewScanner(r io.Reader) *_Scanner {
+	return &_Scanner{r: bufio.NewReader(r)}
 }
 
-func (s *Scanner) read() rune {
+func (s *_Scanner) read() rune {
 	ch, _, err := s.r.ReadRune()
 	if ch == 0 || err != nil {
 		return eof
@@ -39,11 +39,11 @@ func (s *Scanner) read() rune {
 	return ch
 }
 
-func (s *Scanner) unread() {
+func (s *_Scanner) unread() {
 	_ = s.r.UnreadByte()
 }
 
-func (s *Scanner) Scan() (tok Token, lit string, err error) {
+func (s *_Scanner) Scan() (tok _Token, lit string, err error) {
 	ch := s.read()
 	if isWhitespace(ch) { // -> next layer
 		s.unread() // release the previous ws
@@ -59,15 +59,15 @@ func (s *Scanner) Scan() (tok Token, lit string, err error) {
 
 	switch ch {
 	case eof:
-		return EOF, "", nil
+		return _EOF, "", nil
 	case '+':
-		return PLUS, "+", nil // -> new fields
+		return _PLUS, "+", nil // -> new fields
 	default:
-		return ILLEGAL, "", fmt.Errorf("Illegal char as the start with selector\n")
+		return _ILLEGAL, "", fmt.Errorf("Illegal char as the start with selector\n")
 	}
 }
 
-func (s *Scanner) scanWhitespace() (tok Token, lit string, err error) {
+func (s *_Scanner) scanWhitespace() (tok _Token, lit string, err error) {
 	var buf bytes.Buffer
 	for {
 		if ch := s.read(); ch == eof {
@@ -79,10 +79,10 @@ func (s *Scanner) scanWhitespace() (tok Token, lit string, err error) {
 			buf.WriteRune(ch)
 		}
 	}
-	return WHITESPACE, " ", nil
+	return _WHITESPACE, " ", nil
 }
 
-func (s *Scanner) scanNumber() (tok Token, lit string, err error) {
+func (s *_Scanner) scanNumber() (tok _Token, lit string, err error) {
 	var buf bytes.Buffer
 	minus := false
 	for {
@@ -93,7 +93,7 @@ func (s *Scanner) scanNumber() (tok Token, lit string, err error) {
 			break
 		} else if isMinus(ch) {
 			if minus || len(buf.String()) != 0 {
-				return ILLEGAL, "", fmt.Errorf("Could mix number and string after #\n")
+				return _ILLEGAL, "", fmt.Errorf("Could mix number and string after #\n")
 			} else {
 				minus = true
 				buf.WriteRune(ch)
@@ -101,18 +101,18 @@ func (s *Scanner) scanNumber() (tok Token, lit string, err error) {
 		} else if isDigit(ch) {
 			buf.WriteRune(ch)
 		} else {
-			return ILLEGAL, "", fmt.Errorf("Could mix number and string after #\n")
+			return _ILLEGAL, "", fmt.Errorf("Could mix number and string after #\n")
 		}
 	}
 
 	if buf.String() == "" {
-		return NUMBER, "0", nil
+		return _NUMBER, "0", nil
 	} else {
-		return NUMBER, buf.String(), nil
+		return _NUMBER, buf.String(), nil
 	}
 }
 
-func (s *Scanner) scanStar() (tok Token, lit string, err error) {
+func (s *_Scanner) scanStar() (tok _Token, lit string, err error) {
 	for {
 		if ch := s.read(); ch == eof {
 			break
@@ -120,15 +120,15 @@ func (s *Scanner) scanStar() (tok Token, lit string, err error) {
 			s.unread()
 			break
 		} else if isPlus(ch) { // next field
-			return ILLEGAL, "", fmt.Errorf("Could not select the next field when use *\n")
+			return _ILLEGAL, "", fmt.Errorf("Could not select the next field when use *\n")
 		} else {
-			return ILLEGAL, "", fmt.Errorf("Could not mix * and other token after *\n")
+			return _ILLEGAL, "", fmt.Errorf("Could not mix * and other token after *\n")
 		}
 	}
-	return ASTERISK, "*", nil
+	return _ASTERISK, "*", nil
 }
 
-func (s *Scanner) scanIdent() (tok Token, lit string, err error) {
+func (s *_Scanner) scanIdent() (tok _Token, lit string, err error) {
 	var buf bytes.Buffer
 	for {
 		if ch := s.read(); ch == eof {
@@ -146,23 +146,23 @@ func (s *Scanner) scanIdent() (tok Token, lit string, err error) {
 			buf.WriteRune(ch)
 		}
 	}
-	return IDENT, buf.String(), nil
+	return _IDENT, buf.String(), nil
 }
 
-type Parser struct {
-	s *Scanner
+type _Parser struct {
+	s *_Scanner
 }
 
-func NewParser(r string) *Parser {
-	return &Parser{s: NewScanner(strings.NewReader(r))}
+func _NewParser(r string) *_Parser {
+	return &_Parser{s: _NewScanner(strings.NewReader(r))}
 }
 
-func (p *Parser) readNextTok() (tok Token, lit string, err error) {
+func (p *_Parser) readNextTok() (tok _Token, lit string, err error) {
 	return p.s.Scan()
 }
 
-func (p *Parser) Parse() (selector []interface{}, err error) {
-	toks := []*MultiToken{{}} // number / string / multiToken / starToken
+func (p *_Parser) Parse() (selector []interface{}, err error) {
+	toks := []*multiToken{{}} // number / string / multiToken / starToken
 
 out:
 	for {
@@ -172,20 +172,20 @@ out:
 		}
 
 		switch tok {
-		case EOF:
+		case _EOF:
 			break out
-		case WHITESPACE:
-			toks = append(toks, &MultiToken{})
-		case PLUS: // -> no need to handle, append to the last mtok directly
-		case NUMBER:
+		case _WHITESPACE:
+			toks = append(toks, &multiToken{})
+		case _PLUS: // -> no need to handle, append to the last mtok directly
+		case _NUMBER:
 			num, err := strconv.Atoi(lit)
 			if err != nil {
 				panic(err)
 			}
 			toks[len(toks)-1].sels = append(toks[len(toks)-1].sels, num)
-		case ASTERISK:
+		case _ASTERISK:
 			toks[len(toks)-1].sels = append(toks[len(toks)-1].sels, All())
-		case IDENT:
+		case _IDENT:
 			toks[len(toks)-1].sels = append(toks[len(toks)-1].sels, lit)
 		default:
 			panic("Illegal token type\n")
