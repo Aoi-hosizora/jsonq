@@ -275,10 +275,10 @@ func TestSelector(t *testing.T) {
 	}
 
 	jq := NewQuery(doc)
-	val1 := handle(jq.SelectBySelector("#0 ##"))
-	val2 := handle(jq.SelectBySelector("#-3 1+##+\\\\+\\++.+**"))
-	val3 := handle(jq.SelectBySelector("#1 ### #5"))
-	val4 := handle(jq.SelectBySelector("#-2 00+\\\\\\\\+\\+\\++..+***"))
+	val1 := handle(jq.SelectBySelector("#0 \\#"))
+	val2 := handle(jq.SelectBySelector("#-3 1+\\#+\\\\+\\++.+\\*"))
+	val3 := handle(jq.SelectBySelector("#1 \\## #5"))
+	val4 := handle(jq.SelectBySelector("#-2 00+\\\\\\\\+\\+\\++..+\\**"))
 	val5 := handle(jq.SelectBySelector("#2 normal"))
 	val6 := handle(jq.SelectBySelector("#-1 normal+golang"))
 	val7 := handle(jq.SelectBySelector("#-1 *"))
@@ -303,7 +303,7 @@ func TestSelector(t *testing.T) {
 --- PASS: TestStarToken (0.00s)
 === RUN   TestSelector
 --- PASS: TestSelector (0.00s)
-=== RUN   TestEscapeString
---- PASS: TestEscapeString (0.00s)
+=== RUN   TestParser
+--- PASS: TestParser (0.00s)
 PASS
 */

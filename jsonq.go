@@ -81,10 +81,7 @@ func (j *JsonQuery) Select(tokens ...interface{}) (interface{}, error) {
 
 // select json by a selector string
 func (j *JsonQuery) SelectBySelector(selectorString string) (interface{}, error) {
-	selector, err := escapeSelector(selectorString)
-	if err != nil {
-		return nil, err
-	}
+	selector := NewParser(selectorString).Parse()
 	return j.Select(selector...)
 }
 

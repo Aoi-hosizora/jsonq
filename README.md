@@ -1,6 +1,6 @@
 # jsonq
 
-+ A json query library written by golang
++ A json query library written in golang
 
 ### Function
 
@@ -30,43 +30,46 @@ val, err := jq.Select("a", "0", "b")
 // m["a"][0]["b"][0:2]
 val, err := jq.Select("a", 0, "b", jsonq.NewMultiToken(0, 1)) // #0+#1
 // m[1]["*"]["a"]["2"][0/2][:]
-val, err := jq.SelectBySelector("#1 ** a 2 #0+#2 *")
+val, err := jq.SelectBySelector("#1 \\* a 2 #0+#2 *")
 ```
 
 ### Selector
 
 + A convenient language to select json
-+ Grammar definition (temporary, will be updated)
++ Grammar definition
 
 ```
-selector := selector selector // the next layer
-selector := selector+selector // multiple field in the current layer
-selector := token
+selector := mtok        // multi token
 
-token    := #numbers  // array index
-token    := *         // all fields
-token    := #strings  // map key (ignore #)
-token    := *strings  // map key (ignore *)
-token    := strings   // map key
-numbers  := -?(0..9)*
+mtok     := mtok mtok   // the next layer
+mtok     := *           // all fields in the current layer
+mtok     := stok+stok   // multiple fields in the current layer
+mtok     := stok        // single token
+stok     := token       // string or number
+
+token    := #numbers    // array index
+token    := strings     // map key
 ```
 
-+ Escape rule:
-    + use `\` to escape all tokens first (after ` ` and `+`)
-    + use raw number as a field name
-    + use `#numbers` to escape as a number, `##` to escape `#` (only at the start of the token)
-    + use `*` to represent as a star token, `**` to escape `*` (only at the start of the token)
-    + use `#xxx` (`xxx` is a non-numbers) and `*xxx` to represent `xxx`, the first char `#` and `*` will be ignored
++ Rules:
+    + use `  ` to split layers
+    + use `+` to split fields
+    + use `*` to represent all fields (could not use with `+`) 
+    + use `\` to escape all tokens (especially for `  ` `+` `#` `*`)
+    + use `#numbers` as an array index (token start with `#`)
+    + use raw number and other string as a map field name
+    + if a field name starts with `#` or `*`, use `\#` and `\*` (if `#` and `*` is inside string, it is not necessary escape `#` and `*`)
+    + if a field name includes a `  ` or `+`, use `\  ` and `\+`
 + Example
 
 ```
-token1 #2 token3+token4 #5+#6 token7\ \+\ 8 9 #10 ##0# #-1
+token1 #2 token3+token4 #5+#6 token7\ \+\ 8 9 #10 \#0# #-1
 -> "token1", 2, {"token3", "token4"}, {5, 6}, "token7 + 8", "9", 10, "#0#", -1
 
-123123 #000 \\456 \789 ###### * *\* **\\*+***\\*+**+##+###\#
+123123 #000 \\456 \789 \##### * \* \\**\\*+\**\\*+\*+\#+\##\#
 -> "123123", 0, "\456", "789", "#####", *, "*", {"*\*", "**\*", "*", "#", "###"}
 
-0 #1 #2+#3 #4+#5+#6 ##+#0+####\++##+\+##
+0 #1 #2+#3 #4+#5+#6 \#+#0+\###\++\#+\+##
 -> "0", 1, {2, 3}, {4, 5, 6}, {"#", 0, "###+", "#", "+##"}
 ```
 
