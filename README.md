@@ -48,7 +48,7 @@ token    := *         // all fields
 token    := #strings  // map key (ignore #)
 token    := *strings  // map key (ignore *)
 token    := strings   // map key
-numbers  := (0..9)*
+numbers  := -?(0..9)*
 ```
 
 + Escape rule:
