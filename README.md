@@ -51,15 +51,15 @@ token    := #numbers    // array index
 token    := strings     // map key
 ```
 
-+ Rules:
-    + use `  ` to split layers
++ Rules: (`WS` means `whitespace`)
+    + use `WS` to split layers
     + use `+` to split fields
     + use `*` to represent all fields (could not use with `+`) 
-    + use `\` to escape all tokens (especially for `  ` `+` `#` `*`)
+    + use `\` to escape all tokens (especially for `WS` `+` `#` `*`)
     + use `#numbers` as an array index (token start with `#`)
     + use raw number and other string as a map field name
-    + if a field name starts with `#` or `*`, use `\#` and `\*` (if `#` and `*` is inside string, it is not necessary escape `#` and `*`)
-    + if a field name includes a `  ` or `+`, use `\  ` and `\+`
+    + if a field name starts with `#` or `*`, use `\#` and `\*` (if `#` and `*` is inside string, it is not necessary to escape)
+    + if a field name includes a `WS` or `+`, use `\WS` and `\+`
 + Example
 
 ```

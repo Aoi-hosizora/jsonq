@@ -6,9 +6,10 @@ import (
 	"strings"
 )
 
-// blob is a interface of map[string]interface{} (if it is an object-wrapped json)
-// or []interface{} (if it is an array-wrapped json)
+// parse json string first for json query
 type JsonDocument struct {
+	// blob is a interface of map[string]interface{} (if it is an object-wrapped json)
+	// or []interface{} (if it is an array-wrapped json)
 	blob interface{}
 }
 
@@ -37,12 +38,13 @@ func NewJsonDocument(content string) (*JsonDocument, error) {
 	}
 }
 
-// doc is a json document that has been parse correctly
+// query json fields
 type JsonQuery struct {
+	// doc is a json document that has been parse correctly
 	doc *JsonDocument
 }
 
-// create a json query to select json
+// create a JsonQuery to query json
 func NewQuery(doc *JsonDocument) *JsonQuery {
 	return &JsonQuery{doc: doc}
 }
@@ -52,7 +54,7 @@ type MultiToken struct {
 	sels []interface{}
 }
 
-// build a selector which will select multiple fields in the same layer
+// build a multiple selector which will select multiple fields in the same layer
 func NewMultiToken(tokens ...interface{}) *MultiToken {
 	return &MultiToken{sels: tokens}
 }
@@ -67,7 +69,7 @@ func NewStarToken() *StarToken {
 
 // key code start from here
 
-// select json by a slice of strings / integers / MultiTokens
+// query json by a slice of strings / integers / MultiTokens
 func (j *JsonQuery) Select(tokens ...interface{}) (interface{}, error) {
 	vals, multi, err := rquery(j.doc.blob, tokens...)
 	if err != nil {
@@ -79,9 +81,12 @@ func (j *JsonQuery) Select(tokens ...interface{}) (interface{}, error) {
 	return vals[0], nil
 }
 
-// select json by a selector string
+// query json by a selector string
 func (j *JsonQuery) SelectBySelector(selectorString string) (interface{}, error) {
-	selector := NewParser(selectorString).Parse()
+	selector, err := NewParser(selectorString).Parse()
+	if err != nil {
+		return nil, err
+	}
 	return j.Select(selector...)
 }
 
