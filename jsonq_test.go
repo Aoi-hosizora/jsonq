@@ -305,5 +305,7 @@ func TestSelector(t *testing.T) {
 --- PASS: TestSelector (0.00s)
 === RUN   TestParser
 --- PASS: TestParser (0.00s)
+=== RUN   TestTypes
+--- PASS: TestTypes (0.00s)
 PASS
 */

@@ -8,9 +8,20 @@
 + Select by selector (jsonq version)
 + ~~Return a multi-layers object~~ (only support to return an array now)
 
+### Install
+
+```bash
+# use go get
+go get github.com/Aoi-hosizora/jsonq
+
+# use go mod
+# import "github.com/Aoi-hosizora/jsonq"
+go mod tidy
+```
+
 ### Usage
 
-+ see [jsonq_test.go](jsonq_test.go) for details
++ see [jsonq_test.go](jsonq_test.go) and [types_test.go](types_test.go) for details
 
 ```go
 doc, err := jsonq.NewJsonDocument(objDoc)
@@ -22,9 +33,9 @@ jq := jsonq.NewJsonQuery(doc)
 // m[1]
 val, err := jq.Select(1)
 // m[:]
-val, err := jq.Select(jsonq.All()) // *
+val, err := jq.Strings(jsonq.All()) // *
 // m[len(m)-2][0]
-val, err := jq.Select(-2, 0)
+val, err := jq.Int64(-2, 0)
 // m["a"]["0"]["b"]
 val, err := jq.Select("a", "0", "b")
 // m["a"][0]["b"][0:2]
