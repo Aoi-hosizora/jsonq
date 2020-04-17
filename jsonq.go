@@ -45,7 +45,7 @@ type JsonQuery struct {
 }
 
 // create a JsonQuery to query json
-func NewQuery(doc *JsonDocument) *JsonQuery {
+func NewJsonQuery(doc *JsonDocument) *JsonQuery {
 	return &JsonQuery{doc: doc}
 }
 
@@ -55,7 +55,7 @@ type MultiToken struct {
 }
 
 // build a multiple selector which will select multiple fields in the same layer
-func NewMultiToken(tokens ...interface{}) *MultiToken {
+func Multi(tokens ...interface{}) *MultiToken {
 	return &MultiToken{sels: tokens}
 }
 
@@ -63,7 +63,7 @@ func NewMultiToken(tokens ...interface{}) *MultiToken {
 type StarToken struct{}
 
 // build a selector which will select all fields in the same layer
-func NewStarToken() *StarToken {
+func All() *StarToken {
 	return &StarToken{}
 }
 

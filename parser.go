@@ -184,7 +184,7 @@ out:
 			}
 			toks[len(toks)-1].sels = append(toks[len(toks)-1].sels, num)
 		case ASTERISK:
-			toks[len(toks)-1].sels = append(toks[len(toks)-1].sels, NewStarToken())
+			toks[len(toks)-1].sels = append(toks[len(toks)-1].sels, All())
 		case IDENT:
 			toks[len(toks)-1].sels = append(toks[len(toks)-1].sels, lit)
 		default:

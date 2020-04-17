@@ -126,7 +126,7 @@ func TestObject(t *testing.T) {
 		log.Fatalln(err)
 	}
 
-	jq := NewQuery(doc)
+	jq := NewJsonQuery(doc)
 	val1 := handle(jq.Select("a"))                  // b
 	val2 := handle(jq.Select("c", "e"))             // 0
 	val3 := handle(jq.Select("c", "f", 0))          // map[g:123 h:0.3 i:abc]
@@ -174,7 +174,7 @@ func TestArray(t *testing.T) {
 		log.Fatalln(err)
 	}
 
-	jq := NewQuery(doc)
+	jq := NewJsonQuery(doc)
 	val1 := handle(jq.Select(0))                 // [1 2 3]
 	val2 := handle(jq.Select(1))                 // map[a:0 b:map[c:d e:0.2]]
 	val3 := handle(jq.Select(2, "a"))            // 1
@@ -202,14 +202,14 @@ func TestMultiToken(t *testing.T) {
 		log.Fatalln(err)
 	}
 
-	jq := NewQuery(doc)
-	val1 := handle(jq.Select(NewMultiToken(1, 2, 3), "a"))                             // [0 1 2]
-	val2 := handle(jq.Select(NewMultiToken(1, 2, 3), "b", "c"))                        // [d dd ddd]
-	val3 := handle(jq.Select(NewMultiToken(1, 2, 3), "b", NewMultiToken("c", "e")))    // [d 0.2 dd 0.22 ddd 0.222]
-	val4 := handle(jq.Select(1, NewMultiToken("b", "bb"), "c"))                        // [d dd]
-	val5 := handle(jq.Select(1, NewMultiToken("b", "bb"), NewMultiToken("c", "e")))    // [d 0.2 dd 0.22]
-	val6 := handle(jq.Select(NewMultiToken(2, 3), "b", "f", NewMultiToken(0, 1), "g")) // [1g 1gg 2g 2gg]
-	val7 := handle(jq.Select(-2, "b", "f", NewMultiToken(-1, -2), -3))                 // [4.1, 1]
+	jq := NewJsonQuery(doc)
+	val1 := handle(jq.Select(Multi(1, 2, 3), "a"))                     // [0 1 2]
+	val2 := handle(jq.Select(Multi(1, 2, 3), "b", "c"))                // [d dd ddd]
+	val3 := handle(jq.Select(Multi(1, 2, 3), "b", Multi("c", "e")))    // [d 0.2 dd 0.22 ddd 0.222]
+	val4 := handle(jq.Select(1, Multi("b", "bb"), "c"))                // [d dd]
+	val5 := handle(jq.Select(1, Multi("b", "bb"), Multi("c", "e")))    // [d 0.2 dd 0.22]
+	val6 := handle(jq.Select(Multi(2, 3), "b", "f", Multi(0, 1), "g")) // [1g 1gg 2g 2gg]
+	val7 := handle(jq.Select(-2, "b", "f", Multi(-1, -2), -3))         // [4.1, 1]
 
 	assert.Equal(t, val1, []interface{}{0., 1., 2.})
 	assert.Equal(t, val2, []interface{}{"d", "dd", "ddd"})
@@ -242,12 +242,12 @@ func TestStarToken(t *testing.T) {
 		log.Fatalln(err)
 	}
 
-	jq := NewQuery(doc)
-	val1 := handle(jq.Select(0, NewStarToken()))
-	val2 := handle(jq.Select(1, "b", NewStarToken()))
-	val3 := handle(jq.Select(2, "b", "f", NewStarToken(), "g"))
-	val4 := handle(jq.Select(2, "b", "f", NewStarToken(), NewMultiToken("g", "h")))
-	val5 := handle(jq.Select(-2, "b", "f", -2, NewStarToken()))
+	jq := NewJsonQuery(doc)
+	val1 := handle(jq.Select(0, All()))
+	val2 := handle(jq.Select(1, "b", All()))
+	val3 := handle(jq.Select(2, "b", "f", All(), "g"))
+	val4 := handle(jq.Select(2, "b", "f", All(), Multi("g", "h")))
+	val5 := handle(jq.Select(-2, "b", "f", -2, All()))
 
 	assert.Equal(t, val1, []interface{}{1., 2., 3.})
 	assert.Equal(t, val2, []interface{}{"d", 0.2})
@@ -274,7 +274,7 @@ func TestSelector(t *testing.T) {
 		log.Fatalln(err)
 	}
 
-	jq := NewQuery(doc)
+	jq := NewJsonQuery(doc)
 	val1 := handle(jq.SelectBySelector("#0 \\#"))
 	val2 := handle(jq.SelectBySelector("#-3 1+\\#+\\\\+\\++.+\\*"))
 	val3 := handle(jq.SelectBySelector("#1 \\## #5"))

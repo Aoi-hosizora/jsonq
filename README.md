@@ -17,18 +17,18 @@ doc, err := jsonq.NewJsonDocument(objDoc)
 if err != nil {
     log.Fatalln(err)
 }
-jq := jsonq.NewQuery(doc)
+jq := jsonq.NewJsonQuery(doc)
 
 // m[1]
 val, err := jq.Select(1)
 // m[:]
-val, err := jq.Select(jsonq.NewStarToken()) // *
+val, err := jq.Select(jsonq.All()) // *
 // m[len(m)-2][0]
 val, err := jq.Select(-2, 0)
 // m["a"]["0"]["b"]
 val, err := jq.Select("a", "0", "b")
 // m["a"][0]["b"][0:2]
-val, err := jq.Select("a", 0, "b", jsonq.NewMultiToken(0, 1)) // #0+#1
+val, err := jq.Select("a", 0, "b", jsonq.Multi(0, 1)) // #0+#1
 // m[1]["*"]["a"]["2"][0/2][:]
 val, err := jq.SelectBySelector("#1 \\* a 2 #0+#2 *")
 ```
