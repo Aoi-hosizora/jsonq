@@ -73,3 +73,4 @@ token1 #2 token3+token4 #5+#6 token7\ \+\ 8 9 #10 ##0# #-1
 ### References
 
 + [jmoiron/jsonq](https://github.com/jmoiron/jsonq)
++ [Handwritten Parsers & Lexers in Go](https://blog.gopheracademy.com/advent-2014/parsers-lexers/)
