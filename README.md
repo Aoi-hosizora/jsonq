@@ -56,7 +56,7 @@ selector := mtok        // multi token
 
 mtok     := mtok mtok   // the next layer
 mtok     := *           // all fields in the current layer
-mtok     := stok+stok   // multiple fields in the current layer
+mtok     := mtok+stok   // multiple fields in the current layer
 mtok     := stok        // single token
 stok     := token       // string or number
 

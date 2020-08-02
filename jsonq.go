@@ -1,75 +1,84 @@
 package jsonq
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"strings"
 )
 
-// parse json string first for json query
+// Parse json string first for json query.
 type JsonDocument struct {
-	// blob is a interface of map[string]interface{} (if it is an object-wrapped json)
-	// or []interface{} (if it is an array-wrapped json)
+	// a interface of
+	// 1. `map[string]interface{}` (if it is an object-wrapped json)
+	// 2. `[]interface{}` (if it is an array-wrapped json)
 	blob interface{}
 }
 
-// create a JsonDocument, parse json string first
-func NewJsonDocument(content string) (*JsonDocument, error) {
-	content = strings.TrimSpace(content)
-	if len(content) == 0 {
-		return nil, fmt.Errorf("Expected json string, got an empty string\n")
+// Create a JsonDocument, handle json string first (`{` or `[`).
+func NewJsonDocument(data []byte) (*JsonDocument, error) {
+	data = bytes.TrimSpace(data)
+	if len(data) == 0 {
+		return nil, fmt.Errorf("expected json string, got an empty string")
 	}
-	if content[0] == '{' { // object-wrapped
+
+	// object-wrapped
+	if data[0] == '{' {
 		obj := make(map[string]interface{})
-		err := json.Unmarshal([]byte(content), &obj)
+		err := json.Unmarshal(data, &obj)
 		if err != nil {
 			return nil, err
 		}
 		return &JsonDocument{blob: obj}, nil
-	} else if content[0] == '[' { // array-wrapped
+	}
+
+	// array-wrapped
+	if data[0] == '[' {
 		arr := make([]interface{}, 0)
-		err := json.Unmarshal([]byte(content), &arr)
+		err := json.Unmarshal(data, &arr)
 		if err != nil {
 			return nil, err
 		}
 		return &JsonDocument{blob: arr}, nil
-	} else { // other start token
-		return nil, fmt.Errorf("Expected [ or { as the json's first token, got \"%c\"\n", content[0])
 	}
+
+	// other start token
+	return nil, fmt.Errorf("expected [ or { as the json's first token, got \"%c\"", data[0])
 }
 
-// query json fields
+// Query json fields.
 type JsonQuery struct {
-	// doc is a json document that has been parse correctly
+	// a json document that has been check (parse) correctly
 	doc *JsonDocument
 }
 
-// create a JsonQuery to query json
+// Create a JsonQuery to query json.
 func NewJsonQuery(doc *JsonDocument) *JsonQuery {
 	return &JsonQuery{doc: doc}
 }
 
-// select multiple fields in the same layer -> "+"
+// Select multiple fields in the same layer -> "+".
 type multiToken struct {
 	sels []interface{}
 }
 
-// build a multiple selector which will select multiple fields in the same layer
+// Build a multiple selector which will select multiple fields in the same layer.
 func Multi(tokens ...interface{}) *multiToken {
 	return &multiToken{sels: tokens}
 }
 
-// select all fields in the same layer -> "*"
+// Select all fields in the same layer -> "*".
 type starToken struct{}
 
-// build a selector which will select all fields in the same layer
+// Build a selector which will select all fields in the same layer.
 func All() *starToken {
 	return &starToken{}
 }
 
+// ========================
 // key code start from here
+// ========================
 
-// query json by a slice of strings / integers / MultiTokens
+// Query json by a slice of strings / integers / MultiTokens.
 func (j *JsonQuery) Select(tokens ...interface{}) (interface{}, error) {
 	vals, multi, err := rquery(j.doc.blob, tokens...)
 	if err != nil {
@@ -81,7 +90,7 @@ func (j *JsonQuery) Select(tokens ...interface{}) (interface{}, error) {
 	return vals[0], nil
 }
 
-// query json by a selector string
+// Query json by a selector string.
 func (j *JsonQuery) SelectBySelector(selectorString string) (interface{}, error) {
 	selector, err := _NewParser(selectorString).Parse()
 	if err != nil {
@@ -90,11 +99,12 @@ func (j *JsonQuery) SelectBySelector(selectorString string) (interface{}, error)
 	return j.Select(selector...)
 }
 
-// repetition query: tokens []interface{}
-// If it is a SingleToken(string, integer), it will select fields in different layers
-// If it is a multiToken(starToken will return error), it will select fields in the same layer
-// If it is a starToken, it will select all fields in the same layer
-// once have a multiToken or an starToken, that will return an array
+// Repetition query: tokens []interface{}.
+//
+// If it is a SingleToken(string, integer), it will select fields in different layers.
+// If it is a multiToken(starToken will return error), it will select fields in the same layer.
+// If it is a starToken, it will select all fields in the same layer.
+// Once have a multiToken or an starToken, that will return an array.
 func rquery(blob interface{}, tokens ...interface{}) ([]interface{}, bool, error) {
 	vals := []interface{}{blob}
 	isArray := false
@@ -148,10 +158,11 @@ func rquery(blob interface{}, tokens ...interface{}) ([]interface{}, bool, error
 	return vals, isArray, nil
 }
 
-// query a single field: token interface{}
-// If it is an integer, it will select an item in the array
-// If it is a string, it will select a field in the map
-// If the index is out of bound, or the map does not contain field, it will return an error
+// Query a single field: token interface{}.
+//
+// If it is an integer, it will select an item in the array.
+// If it is a string, it will select a field in the map.
+// If the index is out of bound, or the map does not contain field, it will return an error.
 func query(blob interface{}, token interface{}) (interface{}, error) {
 	idx, ok := token.(int) // index
 	if ok {
@@ -184,7 +195,7 @@ func query(blob interface{}, token interface{}) (interface{}, error) {
 	return nil, fmt.Errorf("Input %v is a non-array and non-object\n", blob)
 }
 
-// query all fields: starToken
+// Query all fields: starToken.
 func queryAll(blob interface{}) ([]interface{}, error) {
 	arr, ok := blob.([]interface{})
 	if ok {

@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
+	"unsafe"
 )
 
 var objDoc = `
@@ -121,7 +122,8 @@ func handle(obj interface{}, err error) interface{} {
 }
 
 func TestObject(t *testing.T) {
-	doc, err := NewJsonDocument(objDoc)
+	bytes := *(*[]byte)(unsafe.Pointer(&objDoc))
+	doc, err := NewJsonDocument(bytes)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -169,7 +171,8 @@ func TestObject(t *testing.T) {
 }
 
 func TestArray(t *testing.T) {
-	doc, err := NewJsonDocument(arrDoc)
+	bytes := *(*[]byte)(unsafe.Pointer(&arrDoc))
+	doc, err := NewJsonDocument(bytes)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -197,7 +200,8 @@ func TestArray(t *testing.T) {
 }
 
 func TestMultiToken(t *testing.T) {
-	doc, err := NewJsonDocument(arrDoc)
+	bytes := *(*[]byte)(unsafe.Pointer(&arrDoc))
+	doc, err := NewJsonDocument(bytes)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -237,7 +241,8 @@ func TestMultiToken(t *testing.T) {
 }
 
 func TestStarToken(t *testing.T) {
-	doc, err := NewJsonDocument(arrDoc)
+	bytes := *(*[]byte)(unsafe.Pointer(&arrDoc))
+	doc, err := NewJsonDocument(bytes)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -269,7 +274,8 @@ func TestStarToken(t *testing.T) {
 }
 
 func TestSelector(t *testing.T) {
-	doc, err := NewJsonDocument(sepDoc)
+	bytes := *(*[]byte)(unsafe.Pointer(&sepDoc))
+	doc, err := NewJsonDocument(bytes)
 	if err != nil {
 		log.Fatalln(err)
 	}

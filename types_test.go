@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
+	"unsafe"
 )
 
 var typeDoc = `
@@ -43,7 +44,8 @@ var typeDoc = `
 `
 
 func TestTypes(t *testing.T) {
-	doc, err := NewJsonDocument(typeDoc)
+	bytes := *(*[]byte)(unsafe.Pointer(&typeDoc))
+	doc, err := NewJsonDocument(bytes)
 	if err != nil {
 		log.Fatalln(err)
 	}
