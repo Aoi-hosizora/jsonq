@@ -1,7 +1,8 @@
 package jsonq
 
 import (
-	"github.com/stretchr/testify/assert"
+	"github.com/Aoi-hosizora/ahlib/xslice"
+	"github.com/Aoi-hosizora/ahlib/xtesting"
 	"log"
 	"testing"
 	"unsafe"
@@ -139,15 +140,15 @@ func TestObject(t *testing.T) {
 	val8 := handle(jq.Select("c", "j", "l", 0, -1)) // 3
 	val9 := handle(jq.Select("c", "j", "l", 0, -2)) // 2
 
-	assert.Equal(t, val1, "b")
-	assert.Equal(t, val2, 0.)
-	assert.Equal(t, val3, map[string]interface{}{"g": 123., "h": 0.3, "i": "abc"})
-	assert.Equal(t, val4, 0.3)
-	assert.Equal(t, val5, nil)
-	assert.Equal(t, val6, []interface{}{1., 2., 3.})
-	assert.Equal(t, val7, 1.)
-	assert.Equal(t, val8, 3.)
-	assert.Equal(t, val9, 2.)
+	xtesting.Equal(t, val1, "b")
+	xtesting.Equal(t, val2, 0.)
+	xtesting.Equal(t, val3, map[string]interface{}{"g": 123., "h": 0.3, "i": "abc"})
+	xtesting.Equal(t, val4, 0.3)
+	xtesting.Equal(t, val5, nil)
+	xtesting.Equal(t, val6, []interface{}{1., 2., 3.})
+	xtesting.Equal(t, val7, 1.)
+	xtesting.Equal(t, val8, 3.)
+	xtesting.Equal(t, val9, 2.)
 
 	val11 := handle(jq.SelectBySelector("a"))
 	val12 := handle(jq.SelectBySelector("c e"))
@@ -159,15 +160,15 @@ func TestObject(t *testing.T) {
 	val18 := handle(jq.SelectBySelector("c j l #0 #-1"))
 	val19 := handle(jq.SelectBySelector("c j l #0 #-2"))
 
-	assert.Equal(t, val11, "b")
-	assert.Equal(t, val12, 0.)
-	assert.Equal(t, val13, map[string]interface{}{"g": 123., "h": 0.3, "i": "abc"})
-	assert.Equal(t, val14, 0.3)
-	assert.Equal(t, val15, nil)
-	assert.Equal(t, val16, []interface{}{1., 2., 3.})
-	assert.Equal(t, val17, 1.)
-	assert.Equal(t, val18, 3.)
-	assert.Equal(t, val19, 2.)
+	xtesting.Equal(t, val11, "b")
+	xtesting.Equal(t, val12, 0.)
+	xtesting.Equal(t, val13, map[string]interface{}{"g": 123., "h": 0.3, "i": "abc"})
+	xtesting.Equal(t, val14, 0.3)
+	xtesting.Equal(t, val15, nil)
+	xtesting.Equal(t, val16, []interface{}{1., 2., 3.})
+	xtesting.Equal(t, val17, 1.)
+	xtesting.Equal(t, val18, 3.)
+	xtesting.Equal(t, val19, 2.)
 }
 
 func TestArray(t *testing.T) {
@@ -188,15 +189,15 @@ func TestArray(t *testing.T) {
 	val8 := handle(jq.Select(4))                 // <nil>
 	val9 := handle(jq.Select(-1))                // <nil>
 
-	assert.Equal(t, val1, []interface{}{1., 2., 3.})
-	assert.Equal(t, val2, map[string]interface{}{"a": 0., "b": map[string]interface{}{"c": "d", "e": 0.2}, "bb": map[string]interface{}{"c": "dd", "e": 0.22}})
-	assert.Equal(t, val3, 1.)
-	assert.Equal(t, val4, "dd")
-	assert.Equal(t, val5, map[string]interface{}{"g": "2g", "h": "2h"})
-	assert.Equal(t, val6, []interface{}{1., 2., 3.})
-	assert.Equal(t, val7, 5.2)
-	assert.Equal(t, val8, nil)
-	assert.Equal(t, val9, nil)
+	xtesting.Equal(t, val1, []interface{}{1., 2., 3.})
+	xtesting.Equal(t, val2, map[string]interface{}{"a": 0., "b": map[string]interface{}{"c": "d", "e": 0.2}, "bb": map[string]interface{}{"c": "dd", "e": 0.22}})
+	xtesting.Equal(t, val3, 1.)
+	xtesting.Equal(t, val4, "dd")
+	xtesting.Equal(t, val5, map[string]interface{}{"g": "2g", "h": "2h"})
+	xtesting.Equal(t, val6, []interface{}{1., 2., 3.})
+	xtesting.Equal(t, val7, 5.2)
+	xtesting.Equal(t, val8, nil)
+	xtesting.Equal(t, val9, nil)
 }
 
 func TestMultiToken(t *testing.T) {
@@ -215,13 +216,13 @@ func TestMultiToken(t *testing.T) {
 	val6 := handle(jq.Select(Multi(2, 3), "b", "f", Multi(0, 1), "g")) // [1g 1gg 2g 2gg]
 	val7 := handle(jq.Select(-2, "b", "f", Multi(-1, -2), -3))         // [4.1, 1]
 
-	assert.Equal(t, val1, []interface{}{0., 1., 2.})
-	assert.Equal(t, val2, []interface{}{"d", "dd", "ddd"})
-	assert.Equal(t, val3, []interface{}{"d", 0.2, "dd", 0.22, "ddd", 0.222})
-	assert.Equal(t, val4, []interface{}{"d", "dd"})
-	assert.Equal(t, val5, []interface{}{"d", 0.2, "dd", 0.22})
-	assert.Equal(t, val6, []interface{}{"1g", "1gg", "2g", "2gg"})
-	assert.Equal(t, val7, []interface{}{4.1, 1.})
+	xtesting.Equal(t, val1, []interface{}{0., 1., 2.})
+	xtesting.Equal(t, val2, []interface{}{"d", "dd", "ddd"})
+	xtesting.Equal(t, val3, []interface{}{"d", 0.2, "dd", 0.22, "ddd", 0.222})
+	xtesting.Equal(t, val4, []interface{}{"d", "dd"})
+	xtesting.Equal(t, val5, []interface{}{"d", 0.2, "dd", 0.22})
+	xtesting.Equal(t, val6, []interface{}{"1g", "1gg", "2g", "2gg"})
+	xtesting.Equal(t, val7, []interface{}{4.1, 1.})
 
 	val11 := handle(jq.SelectBySelector("#1+#2+#3 a"))
 	val12 := handle(jq.SelectBySelector("#1+#2+#3 b c"))
@@ -231,13 +232,13 @@ func TestMultiToken(t *testing.T) {
 	val16 := handle(jq.SelectBySelector("#2+#3 b f #0+#1 g"))
 	val17 := handle(jq.SelectBySelector("#-2 b f #-1+#-2 #-3"))
 
-	assert.Equal(t, val11, []interface{}{0., 1., 2.})
-	assert.Equal(t, val12, []interface{}{"d", "dd", "ddd"})
-	assert.Equal(t, val13, []interface{}{"d", 0.2, "dd", 0.22, "ddd", 0.222})
-	assert.Equal(t, val14, []interface{}{"d", "dd"})
-	assert.Equal(t, val15, []interface{}{"d", 0.2, "dd", 0.22})
-	assert.Equal(t, val16, []interface{}{"1g", "1gg", "2g", "2gg"})
-	assert.Equal(t, val17, []interface{}{4.1, 1.})
+	xtesting.Equal(t, val11, []interface{}{0., 1., 2.})
+	xtesting.Equal(t, val12, []interface{}{"d", "dd", "ddd"})
+	xtesting.Equal(t, val13, []interface{}{"d", 0.2, "dd", 0.22, "ddd", 0.222})
+	xtesting.Equal(t, val14, []interface{}{"d", "dd"})
+	xtesting.Equal(t, val15, []interface{}{"d", 0.2, "dd", 0.22})
+	xtesting.Equal(t, val16, []interface{}{"1g", "1gg", "2g", "2gg"})
+	xtesting.Equal(t, val17, []interface{}{4.1, 1.})
 }
 
 func TestStarToken(t *testing.T) {
@@ -254,11 +255,11 @@ func TestStarToken(t *testing.T) {
 	val4 := handle(jq.Select(2, "b", "f", All(), Multi("g", "h")))
 	val5 := handle(jq.Select(-2, "b", "f", -2, All()))
 
-	assert.Equal(t, val1, []interface{}{1., 2., 3.})
-	assert.Equal(t, val2, []interface{}{"d", 0.2})
-	assert.Equal(t, val3, []interface{}{"1g", "1gg"})
-	assert.Equal(t, val4, []interface{}{"1g", "1h", "1gg", "1hh"})
-	assert.Equal(t, val5, []interface{}{1., 2., 3.})
+	assert(t, val1, []interface{}{1., 2., 3.})
+	assert(t, val2, []interface{}{"d", 0.2})
+	assert(t, val3, []interface{}{"1g", "1gg"})
+	assert(t, val4, []interface{}{"1g", "1h", "1gg", "1hh"})
+	assert(t, val5, []interface{}{1., 2., 3.})
 
 	val11 := handle(jq.SelectBySelector("#0 *"))
 	val12 := handle(jq.SelectBySelector("#1 b *"))
@@ -266,11 +267,11 @@ func TestStarToken(t *testing.T) {
 	val14 := handle(jq.SelectBySelector("#2 b f * g+h"))
 	val15 := handle(jq.SelectBySelector("#-2 b f #-2 *"))
 
-	assert.Equal(t, val11, []interface{}{1., 2., 3.})
-	assert.Equal(t, val12, []interface{}{"d", 0.2})
-	assert.Equal(t, val13, []interface{}{"1g", "1gg"})
-	assert.Equal(t, val14, []interface{}{"1g", "1h", "1gg", "1hh"})
-	assert.Equal(t, val15, []interface{}{1., 2., 3.})
+	assert(t, val11, []interface{}{1., 2., 3.})
+	assert(t, val12, []interface{}{"d", 0.2})
+	assert(t, val13, []interface{}{"1g", "1gg"})
+	assert(t, val14, []interface{}{"1g", "1h", "1gg", "1hh"})
+	assert(t, val15, []interface{}{1., 2., 3.})
 }
 
 func TestSelector(t *testing.T) {
@@ -289,13 +290,13 @@ func TestSelector(t *testing.T) {
 	val6 := handle(jq.SelectBySelector("#-1 normal+golang"))
 	val7 := handle(jq.SelectBySelector("#-1 *"))
 
-	assert.Equal(t, val1, "#")
-	assert.Equal(t, val2, []interface{}{"1", "#", "\\", "+", ".", "*"})
-	assert.Equal(t, val3, "\\#\\")
-	assert.Equal(t, val4, []interface{}{0., "\\\\", "++", "..", "**"})
-	assert.Equal(t, val5, "hello world")
-	assert.Equal(t, val6, []interface{}{"hello world", "hello golang"})
-	assert.Equal(t, val7, []interface{}{"hello world", "hello golang"})
+	xtesting.Equal(t, val1, "#")
+	assert(t, val2, []interface{}{"1", "#", "\\", "+", ".", "*"})
+	xtesting.Equal(t, val3, "\\#\\")
+	assert(t, val4, []interface{}{0., "\\\\", "++", "..", "**"})
+	xtesting.Equal(t, val5, "hello world")
+	assert(t, val6, []interface{}{"hello world", "hello golang"})
+	assert(t, val7, []interface{}{"hello world", "hello golang"})
 }
 
 /*
@@ -315,3 +316,11 @@ func TestSelector(t *testing.T) {
 --- PASS: TestTypes (0.00s)
 PASS
 */
+
+func assert(t *testing.T, val interface{}, dest []interface{}) {
+	sti := xslice.Sti(val)
+	xtesting.Equal(t, len(sti), len(dest))
+	for _, d := range dest {
+		xtesting.Equal(t, xslice.Contains(sti, d), true)
+	}
+}

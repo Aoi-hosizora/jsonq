@@ -7,7 +7,7 @@
 ### Function
 
 + Select object and array by tokens
-+ Select by selector (jsonq version)
++ Select by selectors (jsonq version)
 + ~~Return a multi-layers object~~ (only support to return an array now)
 
 ### Install

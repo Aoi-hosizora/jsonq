@@ -1,7 +1,7 @@
 package jsonq
 
 import (
-	"github.com/stretchr/testify/assert"
+	"github.com/Aoi-hosizora/ahlib/xtesting"
 	"log"
 	"testing"
 	"unsafe"
@@ -53,54 +53,54 @@ func TestTypes(t *testing.T) {
 	jq := NewJsonQuery(doc)
 
 	val1, _ := jq.Int64("foo")
-	assert.Equal(t, val1, int64(1))
+	xtesting.Equal(t, val1, int64(1))
 
 	val2, _ := jq.String("test")
-	assert.Equal(t, val2, "Hello, world!")
+	xtesting.Equal(t, val2, "Hello, world!")
 
 	val3, _ := jq.Float64("baz")
-	assert.Equal(t, val3, 123.1)
+	xtesting.Equal(t, val3, 123.1)
 
 	val4, _ := jq.String("numstring")
-	assert.Equal(t, val4, "42")
+	xtesting.Equal(t, val4, "42")
 
 	val5, _ := jq.String("floatstring")
-	assert.Equal(t, val5, "42.1")
+	xtesting.Equal(t, val5, "42.1")
 
 	val6, _ := jq.Array("array")
-	assert.Equal(t, val6, []interface{}{
+	xtesting.Equal(t, val6, []interface{}{
 		map[string]interface{}{"foo": 1.},
 		map[string]interface{}{"bar": 2.},
 		map[string]interface{}{"baz": 3.},
 	})
 
 	val7, _ := jq.Object("subobj")
-	assert.Equal(t, val7["foo"], 1.)
+	xtesting.Equal(t, val7["foo"], 1.)
 
 	val8, _ := jq.Bool("bool")
-	assert.Equal(t, val8, true)
+	xtesting.Equal(t, val8, true)
 
 	val9, _ := jq.Objects("array")
-	assert.Equal(t, val9, []map[string]interface{}{{"foo": 1.}, {"bar": 2.}, {"baz": 3.}})
+	xtesting.Equal(t, val9, []map[string]interface{}{{"foo": 1.}, {"bar": 2.}, {"baz": 3.}})
 
 	val10, _ := jq.Int64s("subobj", "subarray")
-	assert.Equal(t, val10, []int64{1, 2, 3})
+	xtesting.Equal(t, val10, []int64{1, 2, 3})
 
 	val11, _ := jq.Strings("subobj", "subsubobj", "array")
-	assert.Equal(t, val11, []string{"hello", "world"})
+	xtesting.Equal(t, val11, []string{"hello", "world"})
 
 	val12, _ := jq.Bools("collections", "bools")
-	assert.Equal(t, val12, []bool{false, true, false})
+	xtesting.Equal(t, val12, []bool{false, true, false})
 
 	val13, _ := jq.Arrays("collections", "arrays")
-	assert.Equal(t, val13, [][]interface{}{{1., 2.}, {2., 3.}, {4., 3.}})
+	xtesting.Equal(t, val13, [][]interface{}{{1., 2.}, {2., 3.}, {4., 3.}})
 
 	val14, _ := jq.ObjectsBySelector("collections objects *")
-	assert.Equal(t, val14, []map[string]interface{}{{"obj1": 1.}, {"obj2": 2.}})
+	xtesting.Equal(t, val14, []map[string]interface{}{{"obj1": 1.}, {"obj2": 2.}})
 
 	val15, _ := jq.Int64BySelector("collections objects #0 obj1")
-	assert.Equal(t, val15, int64(1))
+	xtesting.Equal(t, val15, int64(1))
 
 	val16, _ := jq.BoolBySelector("bool")
-	assert.Equal(t, val16, true)
+	xtesting.Equal(t, val16, true)
 }
