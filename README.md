@@ -2,7 +2,8 @@
 
 [![Build Status](https://www.travis-ci.org/Aoi-hosizora/jsonq.svg?branch=master)](https://www.travis-ci.org/Aoi-hosizora/jsonq)
 
-+ A json query library written in golang
++ **Deprecated, use https://github.com/tidwall/gjson please.**
++ A json query library written in golang.
 
 ### Function
 
